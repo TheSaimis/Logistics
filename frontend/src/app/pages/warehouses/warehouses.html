@@ -1,0 +1,107 @@
+<div class="page-header">
+  <h1>Warehouses</h1>
+  @if (auth.canEdit()) {
+    <button class="btn" (click)="openCreate()">＋ New warehouse</button>
+  }
+</div>
+
+@if (error() && !showForm()) {
+  <div class="form-error">{{ error() }}</div>
+}
+
+<div class="wh-grid">
+  @for (w of warehouses(); track w.id) {
+    <div class="card wh-card">
+      <div class="wh-head">
+        <span class="badge badge-blue">{{ w.code }}</span>
+        @if (auth.canEdit()) {
+          <span>
+            <button class="btn btn-ghost btn-sm" (click)="openEdit(w)">Edit</button>
+            <button class="btn btn-ghost btn-sm" (click)="remove(w)">Delete</button>
+          </span>
+        }
+      </div>
+      <h2>{{ w.name }}</h2>
+      <p class="muted">📍 {{ w.location || 'No location' }}</p>
+      <div class="wh-stats">
+        <div>
+          <span class="muted">Units stored</span>
+          <strong>{{ w.totalUnits ?? 0 | number }}</strong>
+        </div>
+        <div>
+          <span class="muted">Capacity</span>
+          <strong>{{ w.capacity ? (w.capacity | number) : '—' }}</strong>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" (click)="openDetail(w)">View stock</button>
+    </div>
+  } @empty {
+    <p class="empty-state">No warehouses yet.</p>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editing() ? 'Edit warehouse' : 'New warehouse' }}</h2>
+      <form (ngSubmit)="save()">
+        <div class="form-row">
+          <div>
+            <label>Code</label>
+            <input name="code" [(ngModel)]="form.code" required placeholder="VNO-2" />
+          </div>
+          <div>
+            <label>Name</label>
+            <input name="name" [(ngModel)]="form.name" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Location</label>
+            <input name="location" [(ngModel)]="form.location" />
+          </div>
+          <div>
+            <label>Capacity (units)</label>
+            <input name="capacity" type="number" min="0" [(ngModel)]="form.capacity" />
+          </div>
+        </div>
+        @if (error()) {
+          <div class="form-error">{{ error() }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">Cancel</button>
+          <button type="submit" class="btn">{{ editing() ? 'Save' : 'Create' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (detail(); as d) {
+  <div class="modal-backdrop" (click)="detail.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ d.code }} — {{ d.name }}</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>SKU</th><th>Product</th><th class="text-right">Quantity</th></tr>
+          </thead>
+          <tbody>
+            @for (level of detailStock(); track level.id) {
+              <tr>
+                <td>{{ level.productSku }}</td>
+                <td>{{ level.productName }}</td>
+                <td class="text-right">{{ level.quantity }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="empty-state">This warehouse is empty.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="detail.set(null)">Close</button>
+      </div>
+    </div>
+  </div>
+}

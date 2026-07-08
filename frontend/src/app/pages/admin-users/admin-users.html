@@ -1,0 +1,101 @@
+<div class="page-header">
+  <h1>User management</h1>
+  <button class="btn" (click)="openCreate()">＋ New user</button>
+</div>
+
+@if (error() && !showForm()) {
+  <div class="form-error">{{ error() }}</div>
+}
+
+<div class="card table-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Roles</th><th>Provider</th>
+          <th>Status</th><th>Created</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of users(); track u.id) {
+          <tr>
+            <td><strong>{{ u.fullName }}</strong></td>
+            <td>{{ u.email }}</td>
+            <td>
+              @for (r of u.roles; track r) {
+                <span class="badge role-badge"
+                      [class.badge-red]="r === 'ADMIN'"
+                      [class.badge-blue]="r === 'MANAGER'"
+                      [class.badge-gray]="r === 'VIEWER'">{{ r }}</span>
+              }
+            </td>
+            <td class="muted">{{ u.provider }}</td>
+            <td>
+              <span class="badge" [class.badge-green]="u.enabled" [class.badge-gray]="!u.enabled">
+                {{ u.enabled ? 'Enabled' : 'Disabled' }}
+              </span>
+            </td>
+            <td class="muted">{{ u.createdAt | date: 'MMM d, y' }}</td>
+            <td class="text-right">
+              <button class="btn btn-ghost btn-sm" (click)="openEdit(u)">Edit</button>
+              @if (u.email !== auth.user()?.email) {
+                <button class="btn btn-ghost btn-sm" (click)="remove(u)">Delete</button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="empty-state">No users.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editing() ? 'Edit user' : 'New user' }}</h2>
+      <form (ngSubmit)="save()">
+        <div class="form-row">
+          <div>
+            <label>Full name</label>
+            <input name="fullName" [(ngModel)]="form.fullName" required />
+          </div>
+          <div>
+            <label>Email</label>
+            <input name="email" type="email" [(ngModel)]="form.email" required [disabled]="!!editing()" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>{{ editing() ? 'New password (leave blank to keep current)' : 'Password' }}</label>
+          <input name="password" type="password" [(ngModel)]="form.password" [required]="!editing()"
+                 autocomplete="new-password" />
+        </div>
+        <div class="form-field">
+          <label>Roles</label>
+          <div class="role-checks">
+            @for (role of allRoles; track role) {
+              <label class="role-check">
+                <input type="checkbox" [checked]="form.roles.includes(role)" (change)="toggleRole(role)" />
+                {{ role }}
+              </label>
+            }
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="role-check">
+            <input type="checkbox" name="enabled" [(ngModel)]="form.enabled" />
+            Account enabled
+          </label>
+        </div>
+        @if (error()) {
+          <div class="form-error">{{ error() }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">Cancel</button>
+          <button type="submit" class="btn" [disabled]="form.roles.length === 0">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

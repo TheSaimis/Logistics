@@ -1,0 +1,34 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo">
+      <span>📦</span>
+      <strong>Logistics IMS</strong>
+    </div>
+
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">🏠 Dashboard</a>
+      <a routerLink="/products" routerLinkActive="active">📋 Inventory</a>
+      <a routerLink="/movements" routerLinkActive="active">🔄 Movements</a>
+      <a routerLink="/warehouses" routerLinkActive="active">🏭 Warehouses</a>
+      <a routerLink="/partners" routerLinkActive="active">🤝 Partners</a>
+      @if (auth.isAdmin()) {
+        <div class="nav-section">Admin</div>
+        <a routerLink="/admin/analytics" routerLinkActive="active">📊 Analytics</a>
+        <a routerLink="/admin/users" routerLinkActive="active">👥 Users</a>
+        <a routerLink="/admin/audit" routerLinkActive="active">🧾 Audit log</a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user">
+        <strong>{{ auth.user()?.fullName }}</strong>
+        <span class="muted">{{ auth.user()?.roles?.join(', ') }}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

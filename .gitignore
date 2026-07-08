@@ -1,0 +1,23 @@
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+npm-debug.log*
+
+# Java / Maven
+backend/target/
+*.class
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+Thumbs.db
+.DS_Store
+
+# Local env & logs
+*.log
+.env
+
+# Claude Code local (machine-specific permissions)
+.claude/settings.local.json

@@ -1,0 +1,12 @@
+.table-card {
+  padding: 0;
+
+  .pagination {
+    padding: 0.75rem 1rem;
+  }
+
+  td:last-child {
+    white-space: normal;
+    max-width: 380px;
+  }
+}

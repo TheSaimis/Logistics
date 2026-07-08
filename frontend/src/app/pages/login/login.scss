@@ -1,0 +1,81 @@
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #60a5fa 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  .brand-icon {
+    font-size: 2.2rem;
+  }
+
+  h1 {
+    font-size: 1.35rem;
+    margin: 0.35rem 0 0.15rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+.google {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.1rem 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+}
+
+.switch {
+  text-align: center;
+  margin: 1.1rem 0 0;
+}
+
+.demo {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  box-shadow: none;
+  background: #f8fafc;
+
+  strong {
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+}

@@ -1,0 +1,107 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <label class="wh-filter">
+    Warehouse:
+    <select [(ngModel)]="warehouseFilter" (change)="load()">
+      <option [ngValue]="null">All warehouses</option>
+      @for (w of warehouses(); track w.id) {
+        <option [ngValue]="w.id">{{ w.code }} — {{ w.name }}</option>
+      }
+    </select>
+  </label>
+</div>
+
+@if (error()) {
+  <div class="card form-error">{{ error() }}</div>
+}
+
+@if (stats(); as s) {
+  <div class="stat-grid">
+    <div class="card stat">
+      <span class="stat-label">Products</span>
+      <span class="stat-value">{{ s.totalProducts }}</span>
+    </div>
+    <div class="card stat">
+      <span class="stat-label">Warehouses</span>
+      <span class="stat-value">{{ s.totalWarehouses }}</span>
+    </div>
+    <div class="card stat">
+      <span class="stat-label">Suppliers</span>
+      <span class="stat-value">{{ s.totalSuppliers }}</span>
+    </div>
+    <div class="card stat">
+      <span class="stat-label">Units in stock</span>
+      <span class="stat-value">{{ s.totalUnits | number }}</span>
+    </div>
+    <div class="card stat">
+      <span class="stat-label">Stock value</span>
+      <span class="stat-value">{{ s.stockValue | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
+    </div>
+  </div>
+
+  <div class="panel-grid">
+    <div class="card">
+      <div class="panel-header">
+        <h2>⚠️ Low stock</h2>
+        <a routerLink="/products" class="muted">View inventory →</a>
+      </div>
+      @if (s.lowStock.length === 0) {
+        <p class="empty-state">All products are above their reorder level. 🎉</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>SKU</th><th>Product</th><th>Warehouse</th><th class="text-right">Qty</th><th class="text-right">Reorder at</th></tr>
+            </thead>
+            <tbody>
+              @for (row of s.lowStock; track row.id) {
+                <tr>
+                  <td>{{ row.productSku }}</td>
+                  <td>{{ row.productName }}</td>
+                  <td>{{ row.warehouseCode }}</td>
+                  <td class="text-right"><span class="badge badge-red">{{ row.quantity }}</span></td>
+                  <td class="text-right muted">{{ row.reorderLevel }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="card">
+      <div class="panel-header">
+        <h2>🕒 Recent movements</h2>
+        <a routerLink="/movements" class="muted">All movements →</a>
+      </div>
+      @if (s.recentMovements.length === 0) {
+        <p class="empty-state">No stock movements yet.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Type</th><th>Product</th><th>Warehouse</th><th class="text-right">Qty</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+              @for (m of s.recentMovements; track m.id) {
+                <tr>
+                  <td>
+                    <span class="badge"
+                          [class.badge-green]="m.type === 'IN'"
+                          [class.badge-red]="m.type === 'OUT'"
+                          [class.badge-blue]="m.type === 'TRANSFER'"
+                          [class.badge-amber]="m.type === 'ADJUSTMENT'">{{ m.type }}</span>
+                  </td>
+                  <td>{{ m.productName }}</td>
+                  <td>{{ m.warehouseCode }}{{ m.targetWarehouseCode ? ' → ' + m.targetWarehouseCode : '' }}</td>
+                  <td class="text-right">{{ m.quantity }}</td>
+                  <td class="muted">{{ m.createdAt | date: 'MMM d, HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,25 @@
+.table-card {
+  padding: 0;
+}
+
+.role-badge {
+  margin-right: 0.3rem;
+}
+
+.role-checks {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.role-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+
+  input[type='checkbox'] {
+    width: auto;
+  }
+}

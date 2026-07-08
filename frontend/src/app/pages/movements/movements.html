@@ -1,0 +1,126 @@
+<div class="page-header">
+  <h1>Stock movements</h1>
+  @if (auth.canEdit()) {
+    <button class="btn" (click)="openForm()">＋ Record movement</button>
+  }
+</div>
+
+@if (error() && !showForm()) {
+  <div class="form-error">{{ error() }}</div>
+}
+
+<div class="card table-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Type</th><th>Product</th><th>Warehouse</th>
+          <th class="text-right">Qty</th><th>Reference</th><th>By</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of page()?.content; track m.id) {
+          <tr>
+            <td class="muted">{{ m.createdAt | date: 'MMM d, y HH:mm' }}</td>
+            <td>
+              <span class="badge"
+                    [class.badge-green]="m.type === 'IN'"
+                    [class.badge-red]="m.type === 'OUT'"
+                    [class.badge-blue]="m.type === 'TRANSFER'"
+                    [class.badge-amber]="m.type === 'ADJUSTMENT'">{{ m.type }}</span>
+            </td>
+            <td>{{ m.productSku }} — {{ m.productName }}</td>
+            <td>{{ m.warehouseCode }}{{ m.targetWarehouseCode ? ' → ' + m.targetWarehouseCode : '' }}</td>
+            <td class="text-right">{{ m.quantity }}</td>
+            <td class="muted">{{ m.reference || '—' }}</td>
+            <td class="muted">{{ m.createdBy || '—' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="empty-state">No movements recorded.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (page(); as pg) {
+    <div class="pagination">
+      <span class="muted">{{ pg.totalElements }} movements</span>
+      <button class="btn btn-ghost btn-sm" [disabled]="pg.number === 0" (click)="goToPage(pg.number - 1)">‹ Prev</button>
+      <span>Page {{ pg.number + 1 }} / {{ pg.totalPages || 1 }}</span>
+      <button class="btn btn-ghost btn-sm" [disabled]="pg.number + 1 >= pg.totalPages" (click)="goToPage(pg.number + 1)">Next ›</button>
+    </div>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Record stock movement</h2>
+      <form (ngSubmit)="save()">
+        <div class="form-row">
+          <div>
+            <label>Type</label>
+            <select name="type" [(ngModel)]="form.type">
+              <option value="IN">IN — receive stock</option>
+              <option value="OUT">OUT — ship / consume</option>
+              <option value="ADJUSTMENT">ADJUSTMENT — set absolute qty</option>
+              <option value="TRANSFER">TRANSFER — between warehouses</option>
+            </select>
+          </div>
+          <div>
+            <label>Quantity</label>
+            <input name="quantity" type="number" min="1" [(ngModel)]="form.quantity" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Product</label>
+          <select name="productId" [(ngModel)]="form.productId" required>
+            <option [ngValue]="0" disabled>Select a product…</option>
+            @for (p of products(); track p.id) {
+              <option [ngValue]="p.id">{{ p.sku }} — {{ p.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>{{ form.type === 'TRANSFER' ? 'From warehouse' : 'Warehouse' }}</label>
+            <select name="warehouseId" [(ngModel)]="form.warehouseId" required>
+              <option [ngValue]="0" disabled>Select…</option>
+              @for (w of warehouses(); track w.id) {
+                <option [ngValue]="w.id">{{ w.code }} — {{ w.name }}</option>
+              }
+            </select>
+          </div>
+          @if (form.type === 'TRANSFER') {
+            <div>
+              <label>To warehouse</label>
+              <select name="targetWarehouseId" [(ngModel)]="form.targetWarehouseId" required>
+                <option [ngValue]="null" disabled>Select…</option>
+                @for (w of warehouses(); track w.id) {
+                  <option [ngValue]="w.id">{{ w.code }} — {{ w.name }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Reference</label>
+            <input name="reference" [(ngModel)]="form.reference" placeholder="PO-2026-0105" />
+          </div>
+          <div>
+            <label>Note</label>
+            <input name="note" [(ngModel)]="form.note" />
+          </div>
+        </div>
+        @if (error()) {
+          <div class="form-error">{{ error() }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">Cancel</button>
+          <button type="submit" class="btn" [disabled]="!form.productId || !form.warehouseId">Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

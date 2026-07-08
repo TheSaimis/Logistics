@@ -1,0 +1,246 @@
+<div class="page-header">
+  <h1>Inventory</h1>
+  @if (auth.canEdit()) {
+    <button class="btn" (click)="openCreate()">＋ New product</button>
+  }
+</div>
+
+<div class="card filters">
+  <input placeholder="Search by name or SKU…" [(ngModel)]="search" (keyup.enter)="applyFilters()" />
+  <select [(ngModel)]="categoryFilter" (change)="applyFilters()">
+    <option [ngValue]="null">All categories</option>
+    @for (c of categories(); track c.id) {
+      <option [ngValue]="c.id">{{ c.name }}</option>
+    }
+  </select>
+  <select [(ngModel)]="supplierFilter" (change)="applyFilters()">
+    <option [ngValue]="null">All suppliers</option>
+    @for (s of suppliers(); track s.id) {
+      <option [ngValue]="s.id">{{ s.name }}</option>
+    }
+  </select>
+  <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+    <option value="ALL">All statuses</option>
+    <option value="ACTIVE">Active only</option>
+    <option value="INACTIVE">Inactive only</option>
+  </select>
+  <select [(ngModel)]="stockFilter" (change)="applyFilters()">
+    <option value="ALL">All stock levels</option>
+    <option value="IN">In stock</option>
+    <option value="LOW">Low stock</option>
+    <option value="OUT">Out of stock</option>
+  </select>
+  <button class="btn btn-outline" (click)="applyFilters()">Search</button>
+  <button class="btn btn-ghost" (click)="resetFilters()">Reset</button>
+
+  <div class="spacer"></div>
+
+  <div class="column-settings">
+    <button class="btn btn-ghost" (click)="showColumnMenu.set(!showColumnMenu())">⚙ Columns</button>
+    @if (showColumnMenu()) {
+      <div class="column-menu card">
+        @for (col of columns; track col.key) {
+          <label class="column-option" [class.locked]="isLocked(col.key)">
+            <input type="checkbox" [checked]="isVisible(col.key)" [disabled]="isLocked(col.key)"
+                   (change)="toggleColumn(col.key)" />
+            {{ col.label }}
+            @if (isLocked(col.key)) {
+              <span class="lock-hint">always shown</span>
+            }
+          </label>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (error() && !showForm()) {
+  <div class="form-error">{{ error() }}</div>
+}
+
+<div class="card table-card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          @for (col of columns; track col.key) {
+            @if (isVisible(col.key)) {
+              <th [class.sortable]="!!col.sortField"
+                  [class.text-right]="col.key === 'unitPrice' || col.key === 'totalQuantity' || col.key === 'reorderLevel'"
+                  (click)="sortBy(col)">
+                {{ col.label }}{{ sortIndicator(col) }}
+              </th>
+            }
+          }
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of page()?.content; track p.id) {
+          <tr>
+            @if (isVisible('sku')) {
+              <td><a href="javascript:void(0)" (click)="openDetail(p)">{{ p.sku }}</a></td>
+            }
+            @if (isVisible('name')) {
+              <td>{{ p.name }}</td>
+            }
+            @if (isVisible('category')) {
+              <td class="muted">{{ p.categoryName ?? '—' }}</td>
+            }
+            @if (isVisible('supplier')) {
+              <td class="muted">{{ p.supplierName ?? '—' }}</td>
+            }
+            @if (isVisible('unitPrice')) {
+              <td class="text-right">{{ p.unitPrice | currency: 'EUR' }}</td>
+            }
+            @if (isVisible('reorderLevel')) {
+              <td class="text-right muted">{{ p.reorderLevel }}</td>
+            }
+            @if (isVisible('totalQuantity')) {
+              <td class="text-right">
+                <span class="badge" [class.badge-red]="p.totalQuantity <= p.reorderLevel"
+                      [class.badge-green]="p.totalQuantity > p.reorderLevel">{{ p.totalQuantity }}</span>
+              </td>
+            }
+            @if (isVisible('createdAt')) {
+              <td class="muted">{{ p.createdAt | date: 'MMM d, y' }}</td>
+            }
+            @if (isVisible('status')) {
+              <td>
+                <span class="badge" [class.badge-green]="p.active" [class.badge-gray]="!p.active">
+                  {{ p.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+            }
+            <td class="text-right">
+              @if (auth.canEdit()) {
+                <button class="btn btn-ghost btn-sm" (click)="openEdit(p)">Edit</button>
+                @if (p.active) {
+                  <button class="btn btn-ghost btn-sm" (click)="deactivate(p)">Deactivate</button>
+                }
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td [attr.colspan]="visibleCount()" class="empty-state">No products found.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (page(); as pg) {
+    <div class="pagination">
+      <label class="page-size">
+        Rows:
+        <select [(ngModel)]="pageSize" (change)="changePageSize()">
+          @for (size of pageSizes; track size) {
+            <option [ngValue]="size">{{ size }}</option>
+          }
+        </select>
+      </label>
+      <span class="muted">{{ pg.totalElements }} products</span>
+      <button class="btn btn-ghost btn-sm" [disabled]="pg.number === 0" (click)="goToPage(pg.number - 1)">‹ Prev</button>
+      <span>Page {{ pg.number + 1 }} / {{ pg.totalPages || 1 }}</span>
+      <button class="btn btn-ghost btn-sm" [disabled]="pg.number + 1 >= pg.totalPages" (click)="goToPage(pg.number + 1)">Next ›</button>
+    </div>
+  }
+</div>
+
+<!-- Create / edit modal -->
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editing() ? 'Edit product' : 'New product' }}</h2>
+      <form (ngSubmit)="save()">
+        <div class="form-row">
+          <div>
+            <label>SKU</label>
+            <input name="sku" [(ngModel)]="form.sku" required />
+          </div>
+          <div>
+            <label>Name</label>
+            <input name="name" [(ngModel)]="form.name" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Description</label>
+          <textarea name="description" rows="2" [(ngModel)]="form.description"></textarea>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Category</label>
+            <select name="categoryId" [(ngModel)]="form.categoryId">
+              <option [ngValue]="null">—</option>
+              @for (c of categories(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label>Supplier</label>
+            <select name="supplierId" [(ngModel)]="form.supplierId">
+              <option [ngValue]="null">—</option>
+              @for (s of suppliers(); track s.id) {
+                <option [ngValue]="s.id">{{ s.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Unit price (€)</label>
+            <input name="unitPrice" type="number" step="0.01" min="0" [(ngModel)]="form.unitPrice" required />
+          </div>
+          <div>
+            <label>Reorder level</label>
+            <input name="reorderLevel" type="number" min="0" [(ngModel)]="form.reorderLevel" required />
+          </div>
+        </div>
+        @if (error()) {
+          <div class="form-error">{{ error() }}</div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">Cancel</button>
+          <button type="submit" class="btn">{{ editing() ? 'Save changes' : 'Create product' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Detail modal -->
+@if (detail(); as d) {
+  <div class="modal-backdrop" (click)="detail.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ d.name }} <span class="muted">({{ d.sku }})</span></h2>
+      <p class="muted">{{ d.description || 'No description.' }}</p>
+      <div class="detail-grid">
+        <div><label>Category</label>{{ d.categoryName ?? '—' }}</div>
+        <div><label>Supplier</label>{{ d.supplierName ?? '—' }}</div>
+        <div><label>Unit price</label>{{ d.unitPrice | currency: 'EUR' }}</div>
+        <div><label>Reorder level</label>{{ d.reorderLevel }}</div>
+      </div>
+      <h3>Stock by warehouse</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Warehouse</th><th class="text-right">Quantity</th></tr>
+          </thead>
+          <tbody>
+            @for (level of detailStock(); track level.id) {
+              <tr>
+                <td>{{ level.warehouseCode }} — {{ level.warehouseName }}</td>
+                <td class="text-right">{{ level.quantity }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="2" class="empty-state">No stock recorded.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="detail.set(null)">Close</button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,75 @@
+<div class="page-header">
+  <h1>Analytics</h1>
+</div>
+
+@if (error()) {
+  <div class="card form-error">{{ error() }}</div>
+}
+
+@if (data()) {
+  <div class="analytics-grid">
+
+    <div class="card">
+      <h2>Stock value by category</h2>
+      <div class="bar-chart">
+        @for (bar of categoryBars(); track bar.label) {
+          <div class="bar-col">
+            <span class="bar-value">{{ bar.display }}</span>
+            <div class="bar" [style.height.%]="bar.height"></div>
+            <span class="bar-label">{{ bar.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Stock flow — last 30 days</h2>
+      <div class="legend">
+        <span><i class="dot dot-in"></i> Inbound (IN + transfers)</span>
+        <span><i class="dot dot-out"></i> Outbound (OUT)</span>
+      </div>
+      @if (flow(); as f) {
+        <svg [attr.viewBox]="'0 -10 ' + chartW + ' ' + (chartH + 30)" preserveAspectRatio="none" class="flow-chart">
+          <line x1="0" [attr.y1]="chartH" [attr.x2]="chartW" [attr.y2]="chartH" class="axis" />
+          <path [attr.d]="f.inPath" class="line line-in" />
+          <path [attr.d]="f.outPath" class="line line-out" />
+          @for (label of f.labels; track label.x) {
+            <text [attr.x]="label.x" [attr.y]="chartH + 16" class="tick">{{ label.text }}</text>
+          }
+        </svg>
+        <p class="muted chart-note">Peak day: {{ f.maxY }} units</p>
+      }
+    </div>
+
+    <div class="card">
+      <h2>Warehouse utilization</h2>
+      @for (bar of warehouseBars(); track bar.label) {
+        <div class="hbar-row">
+          <div class="hbar-meta">
+            <strong>{{ bar.label }}</strong>
+            <span class="muted">{{ bar.sub }}</span>
+          </div>
+          <div class="hbar-track">
+            <div class="hbar-fill" [class.over]="bar.over" [style.width.%]="bar.percent"></div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="card">
+      <h2>Top products by stock value</h2>
+      @for (bar of topProductBars(); track bar.label) {
+        <div class="hbar-row">
+          <div class="hbar-meta">
+            <strong>{{ bar.label }}</strong>
+            <span class="muted">{{ bar.sub }}</span>
+          </div>
+          <div class="hbar-track">
+            <div class="hbar-fill alt" [style.width.%]="bar.percent"></div>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+}
