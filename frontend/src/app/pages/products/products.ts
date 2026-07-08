@@ -3,7 +3,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
 import { InventoryService } from '../../core/inventory.service';
-import { Category, Page, Product, ProductRequest, StockLevel, Supplier } from '../../core/models';
+import { Category, ImportResult, Page, Product, ProductRequest, StockLevel, Supplier } from '../../core/models';
 
 interface ColumnDef {
   key: string;
@@ -70,6 +70,10 @@ export class ProductsPage implements OnInit {
   // detail modal state
   detail = signal<Product | null>(null);
   detailStock = signal<StockLevel[]>([]);
+
+  // excel import/export state
+  importing = signal(false);
+  importResult = signal<ImportResult | null>(null);
 
   ngOnInit(): void {
     this.api.categories().subscribe((c) => this.categories.set(c));
@@ -219,6 +223,41 @@ export class ProductsPage implements OnInit {
     this.api.deleteProduct(product.id).subscribe({
       next: () => this.load(),
       error: (err) => this.error.set(err?.error?.message ?? 'Delete failed.'),
+    });
+  }
+
+  exportExcel(): void {
+    this.api.exportProductsExcel().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `inventory-${new Date().toISOString().slice(0, 10)}.xlsx`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.error.set('Export failed.'),
+    });
+  }
+
+  onImportFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = ''; // allow re-selecting the same file
+    this.importing.set(true);
+    this.importResult.set(null);
+    this.error.set('');
+    this.api.importProductsExcel(file).subscribe({
+      next: (result) => {
+        this.importing.set(false);
+        this.importResult.set(result);
+        this.load();
+      },
+      error: (err) => {
+        this.importing.set(false);
+        this.error.set(err?.error?.message ?? 'Import failed.');
+      },
     });
   }
 

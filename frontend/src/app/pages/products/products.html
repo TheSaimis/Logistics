@@ -1,9 +1,31 @@
 <div class="page-header">
   <h1>Inventory</h1>
-  @if (auth.canEdit()) {
-    <button class="btn" (click)="openCreate()">＋ New product</button>
-  }
+  <div class="header-actions">
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export Excel</button>
+    @if (auth.canEdit()) {
+      <label class="btn btn-outline import-label">
+        {{ importing() ? 'Importing…' : '⬆ Import Excel' }}
+        <input type="file" accept=".xlsx" (change)="onImportFile($event)" [disabled]="importing()" hidden />
+      </label>
+      <button class="btn" (click)="openCreate()">＋ New product</button>
+    }
+  </div>
 </div>
+
+@if (importResult(); as result) {
+  <div class="card import-summary">
+    <strong>Import finished:</strong> {{ result.created }} created, {{ result.updated }} updated
+    @if (result.errors.length > 0) {
+      <span class="badge badge-red">{{ result.errors.length }} errors</span>
+      <ul>
+        @for (err of result.errors; track err) {
+          <li>{{ err }}</li>
+        }
+      </ul>
+    }
+    <button class="btn btn-ghost btn-sm" (click)="importResult.set(null)">Dismiss</button>
+  </div>
+}
 
 <div class="card filters">
   <input placeholder="Search by name or SKU…" [(ngModel)]="search" (keyup.enter)="applyFilters()" />

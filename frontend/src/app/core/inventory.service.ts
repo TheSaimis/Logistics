@@ -7,6 +7,7 @@ import {
   AuditEntry,
   Category,
   DashboardStats,
+  ImportResult,
   MovementRequest,
   Page,
   Product,
@@ -67,6 +68,16 @@ export class InventoryService {
 
   deleteProduct(id: number): Observable<void> {
     return this.http.delete<void>(`${API_URL}/products/${id}`);
+  }
+
+  exportProductsExcel(): Observable<Blob> {
+    return this.http.get(`${API_URL}/products/export`, { responseType: 'blob' });
+  }
+
+  importProductsExcel(file: File): Observable<ImportResult> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<ImportResult>(`${API_URL}/products/import`, form);
   }
 
   // Categories

@@ -11,6 +11,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsBySkuIgnoreCase(String sku);
 
+    java.util.Optional<Product> findBySkuIgnoreCase(String sku);
+
     @Query("""
             select p from Product p
             where (cast(:search as string) is null

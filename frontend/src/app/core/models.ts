@@ -139,6 +139,12 @@ export interface ProductValue {
   value: number;
 }
 
+export interface ImportResult {
+  created: number;
+  updated: number;
+  errors: string[];
+}
+
 export interface AuditEntry {
   id: number;
   actor: string;
