@@ -68,6 +68,43 @@ th.sortable {
   }
 }
 
+.scan-bar {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 1rem;
+
+  .scan-icon {
+    font-size: 1.1rem;
+  }
+
+  input {
+    flex: 1;
+  }
+
+  .scan-error {
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
+.barcode-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.75rem 0;
+  flex-wrap: wrap;
+
+  .barcode-img {
+    height: 56px;
+  }
+
+  .qr-img {
+    height: 72px;
+  }
+}
+
 .header-actions {
   display: flex;
   gap: 0.6rem;

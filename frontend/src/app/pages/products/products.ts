@@ -75,6 +75,12 @@ export class ProductsPage implements OnInit {
   importing = signal(false);
   importResult = signal<ImportResult | null>(null);
 
+  // barcode state (label workflow inspired by InvenTree / Snipe-IT)
+  scanValue = '';
+  scanError = signal('');
+  barcodeUrl = signal<string | null>(null);
+  qrUrl = signal<string | null>(null);
+
   ngOnInit(): void {
     this.api.categories().subscribe((c) => this.categories.set(c));
     this.api.suppliers().subscribe((s) => this.suppliers.set(s));
@@ -201,7 +207,60 @@ export class ProductsPage implements OnInit {
   openDetail(product: Product): void {
     this.detail.set(product);
     this.detailStock.set([]);
+    this.revokeBarcodeUrls();
     this.api.stockForProduct(product.id).subscribe((levels) => this.detailStock.set(levels));
+    this.api.productBarcode(product.id, 'code128').subscribe((blob) =>
+      this.barcodeUrl.set(URL.createObjectURL(blob)));
+    this.api.productBarcode(product.id, 'qr').subscribe((blob) =>
+      this.qrUrl.set(URL.createObjectURL(blob)));
+  }
+
+  closeDetail(): void {
+    this.detail.set(null);
+    this.revokeBarcodeUrls();
+  }
+
+  /** Scan box: a barcode scanner "types" the SKU and presses Enter. */
+  onScan(): void {
+    const sku = this.scanValue.trim();
+    if (!sku) return;
+    this.scanError.set('');
+    this.api.products({ search: sku }, 0, 5).subscribe((page) => {
+      const match = page.content.find((p) => p.sku.toLowerCase() === sku.toLowerCase())
+        ?? (page.content.length === 1 ? page.content[0] : undefined);
+      if (match) {
+        this.scanValue = '';
+        this.openDetail(match);
+      } else {
+        this.scanError.set(`No product found for "${sku}"`);
+      }
+    });
+  }
+
+  printLabel(): void {
+    const product = this.detail();
+    const barcode = this.barcodeUrl();
+    if (!product || !barcode) return;
+    const win = window.open('', '_blank', 'width=420,height=260');
+    if (!win) return;
+    win.document.write(`
+      <html><head><title>${product.sku}</title></head>
+      <body style="font-family:sans-serif;text-align:center;margin:16px">
+        <div style="font-size:14px;font-weight:bold">${product.name}</div>
+        <img src="${barcode}" style="margin:8px 0" />
+        <div style="font-size:12px">${product.sku}</div>
+        <script>window.onload = () => { window.print(); }</` + `script>
+      </body></html>`);
+    win.document.close();
+  }
+
+  private revokeBarcodeUrls(): void {
+    const barcode = this.barcodeUrl();
+    const qr = this.qrUrl();
+    if (barcode) URL.revokeObjectURL(barcode);
+    if (qr) URL.revokeObjectURL(qr);
+    this.barcodeUrl.set(null);
+    this.qrUrl.set(null);
   }
 
   save(): void {

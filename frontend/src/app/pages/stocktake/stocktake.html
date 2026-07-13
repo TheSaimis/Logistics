@@ -1,0 +1,92 @@
+<div class="page-header">
+  <h1>Stock take</h1>
+  <label class="wh-pick">
+    Warehouse:
+    <select [(ngModel)]="warehouseId" (change)="loadCounts()">
+      <option [ngValue]="null" disabled>Select…</option>
+      @for (w of warehouses(); track w.id) {
+        <option [ngValue]="w.id">{{ w.code }} — {{ w.name }}</option>
+      }
+    </select>
+  </label>
+</div>
+
+@if (error()) {
+  <div class="form-error">{{ error() }}</div>
+}
+
+@if (result(); as r) {
+  <div class="card result-card">
+    <strong>✅ Stock take {{ r.reference }} complete:</strong>
+    {{ r.itemsCounted }} items counted, {{ r.itemsAdjusted }} adjusted.
+    @if (r.variances.length > 0) {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>SKU</th><th>Product</th><th class="text-right">Expected</th>
+                <th class="text-right">Counted</th><th class="text-right">Variance</th></tr>
+          </thead>
+          <tbody>
+            @for (v of r.variances; track v.productId) {
+              <tr>
+                <td>{{ v.sku }}</td>
+                <td>{{ v.name }}</td>
+                <td class="text-right muted">{{ v.expected }}</td>
+                <td class="text-right">{{ v.counted }}</td>
+                <td class="text-right">
+                  <span class="badge" [class.badge-red]="v.delta < 0" [class.badge-green]="v.delta > 0">
+                    {{ v.delta > 0 ? '+' : '' }}{{ v.delta }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    <button class="btn btn-ghost btn-sm" (click)="result.set(null)">Dismiss</button>
+  </div>
+}
+
+@if (rows().length > 0) {
+  <div class="card table-card">
+    <div class="count-header">
+      <span class="muted">Count each item and enter the actual quantity found.</span>
+      <span>
+        <span class="badge" [class.badge-amber]="varianceCount() > 0"
+              [class.badge-green]="varianceCount() === 0">
+          {{ varianceCount() }} difference(s)
+        </span>
+        <button class="btn" (click)="submit()" [disabled]="submitting()">
+          {{ submitting() ? 'Submitting…' : 'Submit stock take' }}
+        </button>
+      </span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>SKU</th><th>Product</th><th>Bin</th>
+              <th class="text-right">Expected</th><th class="text-right">Counted</th></tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.level.id) {
+            <tr [class.differs]="row.counted !== row.level.quantity">
+              <td>{{ row.level.productSku }}</td>
+              <td>{{ row.level.productName }}</td>
+              <td class="muted">{{ row.level.bin || '—' }}</td>
+              <td class="text-right muted">{{ row.level.quantity }}</td>
+              <td class="text-right">
+                <input class="count-input" type="number" min="0" [(ngModel)]="row.counted"
+                       name="count-{{ row.level.id }}" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+} @else if (warehouseId != null && !result()) {
+  <p class="empty-state">This warehouse has no stock records to count.</p>
+} @else if (warehouseId == null) {
+  <p class="empty-state">Pick a warehouse to start counting.</p>
+}

@@ -28,6 +28,7 @@ class StockServiceTest {
     @Mock private StockMovementRepository stockMovementRepository;
     @Mock private ProductRepository productRepository;
     @Mock private WarehouseRepository warehouseRepository;
+    @Mock private AuditService auditService;
 
     private StockService stockService;
 
@@ -38,7 +39,7 @@ class StockServiceTest {
     @BeforeEach
     void setUp() {
         stockService = new StockService(stockLevelRepository, stockMovementRepository,
-                productRepository, warehouseRepository);
+                productRepository, warehouseRepository, auditService);
         product = Product.builder().id(1L).sku("SKU-1").name("Test product").build();
         warehouse = Warehouse.builder().id(10L).code("WH-A").name("A").build();
         otherWarehouse = Warehouse.builder().id(20L).code("WH-B").name("B").build();

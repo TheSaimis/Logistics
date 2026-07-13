@@ -29,6 +29,14 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/movements/movements').then((m) => m.MovementsPage),
       },
       {
+        path: 'stocktake',
+        loadComponent: () => import('./pages/stocktake/stocktake').then((m) => m.StocktakePage),
+      },
+      {
+        path: 'reorder',
+        loadComponent: () => import('./pages/reorder/reorder').then((m) => m.ReorderPage),
+      },
+      {
         path: 'warehouses',
         loadComponent: () => import('./pages/warehouses/warehouses').then((m) => m.WarehousesPage),
       },

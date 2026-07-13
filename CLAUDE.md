@@ -33,6 +33,9 @@ before adding features; the "Production gate" section is binding before any depl
 
 - JPQL with nullable params on Postgres: wrap in `cast(:param as string/long)` or Hibernate
   binds nulls as bytea → `function lower(bytea) does not exist`. Already done in repositories; follow the pattern.
+- `open-in-view` is false: any DTO mapping that touches lazy relations (product/warehouse on
+  StockLevel etc.) must run inside a @Transactional service method, not directly in a controller —
+  otherwise LazyInitializationException surfaces as a 500.
 - Unhandled exceptions used to surface as 401s (the /error endpoint is now permitAll; a 401 on a valid token still usually means a 500 underneath — check backend logs).
 - Products are soft-deleted (`active=false`) to preserve movement history. Stock changes go
   ONLY through StockService.recordMovement (guards negative stock, writes the movement row).

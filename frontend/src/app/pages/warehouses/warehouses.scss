@@ -1,3 +1,18 @@
+.modal-wide {
+  max-width: 760px;
+}
+
+.cell-input {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.8rem;
+  min-width: 90px;
+
+  &.num {
+    min-width: 70px;
+    width: 70px;
+  }
+}
+
 .wh-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

@@ -27,6 +27,15 @@
   </div>
 }
 
+<div class="card scan-bar">
+  <span class="scan-icon">📷</span>
+  <input placeholder="Scan or type a SKU, then press Enter…" [(ngModel)]="scanValue"
+         (keyup.enter)="onScan()" name="scan" />
+  @if (scanError()) {
+    <span class="form-error scan-error">{{ scanError() }}</span>
+  }
+</div>
+
 <div class="card filters">
   <input placeholder="Search by name or SKU…" [(ngModel)]="search" (keyup.enter)="applyFilters()" />
   <select [(ngModel)]="categoryFilter" (change)="applyFilters()">
@@ -232,10 +241,22 @@
 
 <!-- Detail modal -->
 @if (detail(); as d) {
-  <div class="modal-backdrop" (click)="detail.set(null)">
+  <div class="modal-backdrop" (click)="closeDetail()">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>{{ d.name }} <span class="muted">({{ d.sku }})</span></h2>
       <p class="muted">{{ d.description || 'No description.' }}</p>
+
+      <div class="barcode-row">
+        @if (barcodeUrl(); as bc) {
+          <img [src]="bc" alt="Barcode {{ d.sku }}" class="barcode-img" />
+        }
+        @if (qrUrl(); as qr) {
+          <img [src]="qr" alt="QR {{ d.sku }}" class="qr-img" />
+        }
+        <button class="btn btn-outline btn-sm" (click)="printLabel()" [disabled]="!barcodeUrl()">
+          🖨 Print label
+        </button>
+      </div>
       <div class="detail-grid">
         <div><label>Category</label>{{ d.categoryName ?? '—' }}</div>
         <div><label>Supplier</label>{{ d.supplierName ?? '—' }}</div>
@@ -246,22 +267,23 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Warehouse</th><th class="text-right">Quantity</th></tr>
+            <tr><th>Warehouse</th><th>Bin</th><th class="text-right">Quantity</th></tr>
           </thead>
           <tbody>
             @for (level of detailStock(); track level.id) {
               <tr>
                 <td>{{ level.warehouseCode }} — {{ level.warehouseName }}</td>
+                <td class="muted">{{ level.bin || '—' }}</td>
                 <td class="text-right">{{ level.quantity }}</td>
               </tr>
             } @empty {
-              <tr><td colspan="2" class="empty-state">No stock recorded.</td></tr>
+              <tr><td colspan="3" class="empty-state">No stock recorded.</td></tr>
             }
           </tbody>
         </table>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-ghost" (click)="detail.set(null)">Close</button>
+        <button class="btn btn-ghost" (click)="closeDetail()">Close</button>
       </div>
     </div>
   </div>

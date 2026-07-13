@@ -83,6 +83,44 @@ export interface StockLevel {
   warehouseName: string;
   quantity: number;
   reorderLevel: number;
+  bin?: string | null;
+  minQuantity?: number | null;
+  maxQuantity?: number | null;
+}
+
+export interface StockLevelSettings {
+  bin?: string | null;
+  minQuantity?: number | null;
+  maxQuantity?: number | null;
+}
+
+export interface StocktakeVariance {
+  productId: number;
+  sku: string;
+  name: string;
+  expected: number;
+  counted: number;
+  delta: number;
+}
+
+export interface StocktakeResult {
+  reference: string;
+  itemsCounted: number;
+  itemsAdjusted: number;
+  variances: StocktakeVariance[];
+}
+
+export interface ReorderSuggestion {
+  productId: number;
+  sku: string;
+  productName: string;
+  supplierId?: number | null;
+  supplierName?: string | null;
+  warehouseId?: number | null;
+  warehouseCode?: string | null;
+  currentQuantity: number;
+  minQuantity: number;
+  suggestedQuantity: number;
 }
 
 export type MovementType = 'IN' | 'OUT' | 'ADJUSTMENT' | 'TRANSFER';

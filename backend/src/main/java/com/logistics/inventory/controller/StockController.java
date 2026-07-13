@@ -1,8 +1,6 @@
 package com.logistics.inventory.controller;
 
-import com.logistics.inventory.dto.InventoryDtos.StockLevelDto;
-import com.logistics.inventory.dto.InventoryDtos.StockMovementDto;
-import com.logistics.inventory.dto.InventoryDtos.StockMovementRequest;
+import com.logistics.inventory.dto.InventoryDtos.*;
 import com.logistics.inventory.service.StockService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,5 +43,22 @@ public class StockController {
     public StockMovementDto record(@Valid @RequestBody StockMovementRequest request,
                                    Authentication authentication) {
         return stockService.recordMovement(request, authentication.getName());
+    }
+
+    @PatchMapping("/levels/{id}")
+    public StockLevelDto updateLevelSettings(@PathVariable Long id,
+                                             @Valid @RequestBody StockLevelSettingsRequest request) {
+        return stockService.updateLevelSettings(id, request);
+    }
+
+    @PostMapping("/stocktake")
+    public StocktakeResult stocktake(@Valid @RequestBody StocktakeRequest request,
+                                     Authentication authentication) {
+        return stockService.stocktake(request, authentication.getName());
+    }
+
+    @GetMapping("/reorder-suggestions")
+    public List<ReorderSuggestion> reorderSuggestions() {
+        return stockService.reorderSuggestions();
     }
 }

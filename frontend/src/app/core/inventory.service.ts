@@ -13,8 +13,11 @@ import {
   Product,
   ProductFilters,
   ProductRequest,
+  ReorderSuggestion,
   StockLevel,
+  StockLevelSettings,
   StockMovement,
+  StocktakeResult,
   Supplier,
   UserDto,
   Warehouse,
@@ -135,9 +138,29 @@ export class InventoryService {
     return this.http.delete<void>(`${API_URL}/warehouses/${id}`);
   }
 
+  // Barcodes (Code 128 / QR per SKU)
+  productBarcode(id: number, format: 'code128' | 'qr' = 'code128'): Observable<Blob> {
+    return this.http.get(`${API_URL}/products/${id}/barcode`, {
+      params: new HttpParams().set('format', format),
+      responseType: 'blob',
+    });
+  }
+
   // Stock
   stockForProduct(productId: number): Observable<StockLevel[]> {
     return this.http.get<StockLevel[]>(`${API_URL}/stock/product/${productId}`);
+  }
+
+  updateLevelSettings(levelId: number, settings: StockLevelSettings): Observable<StockLevel> {
+    return this.http.patch<StockLevel>(`${API_URL}/stock/levels/${levelId}`, settings);
+  }
+
+  stocktake(warehouseId: number, counts: { productId: number; counted: number }[]): Observable<StocktakeResult> {
+    return this.http.post<StocktakeResult>(`${API_URL}/stock/stocktake`, { warehouseId, counts });
+  }
+
+  reorderSuggestions(): Observable<ReorderSuggestion[]> {
+    return this.http.get<ReorderSuggestion[]>(`${API_URL}/stock/reorder-suggestions`);
   }
 
   lowStock(): Observable<StockLevel[]> {

@@ -10,6 +10,7 @@ import com.logistics.inventory.exception.NotFoundException;
 import com.logistics.inventory.repository.StockLevelRepository;
 import com.logistics.inventory.repository.WarehouseRepository;
 import com.logistics.inventory.service.AuditService;
+import com.logistics.inventory.service.StockService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -26,6 +27,7 @@ public class WarehouseController {
     private final WarehouseRepository warehouseRepository;
     private final StockLevelRepository stockLevelRepository;
     private final AuditService auditService;
+    private final StockService stockService;
 
     @GetMapping
     public List<WarehouseDto> list() {
@@ -40,7 +42,9 @@ public class WarehouseController {
         if (!warehouseRepository.existsById(id)) {
             throw NotFoundException.of("Warehouse", id);
         }
-        return stockLevelRepository.findByWarehouseId(id).stream().map(StockLevelDto::from).toList();
+        // Must go through the transactional service: DTO mapping touches lazy
+        // product/warehouse proxies and open-in-view is disabled.
+        return stockService.levelsForWarehouse(id);
     }
 
     @PostMapping

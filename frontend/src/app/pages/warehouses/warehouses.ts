@@ -53,7 +53,24 @@ export class WarehousesPage implements OnInit {
   openDetail(warehouse: Warehouse): void {
     this.detail.set(warehouse);
     this.detailStock.set([]);
+    this.savedLevelId.set(null);
     this.api.warehouseStock(warehouse.id).subscribe((s) => this.detailStock.set(s));
+  }
+
+  savedLevelId = signal<number | null>(null);
+
+  saveLevelSettings(level: StockLevel): void {
+    this.api.updateLevelSettings(level.id, {
+      bin: level.bin,
+      minQuantity: level.minQuantity ?? null,
+      maxQuantity: level.maxQuantity ?? null,
+    }).subscribe({
+      next: () => {
+        this.savedLevelId.set(level.id);
+        setTimeout(() => this.savedLevelId.set(null), 1500);
+      },
+      error: (err) => this.error.set(err?.error?.message ?? 'Failed to save stock settings.'),
+    });
   }
 
   save(): void {

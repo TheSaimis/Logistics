@@ -71,14 +71,37 @@ public final class InventoryDtos {
 
     public record StockLevelDto(Long id, Long productId, String productSku, String productName,
                                 Long warehouseId, String warehouseCode, String warehouseName,
-                                int quantity, int reorderLevel) {
+                                int quantity, int reorderLevel,
+                                String bin, Integer minQuantity, Integer maxQuantity) {
         public static StockLevelDto from(StockLevel s) {
             return new StockLevelDto(s.getId(),
                     s.getProduct().getId(), s.getProduct().getSku(), s.getProduct().getName(),
                     s.getWarehouse().getId(), s.getWarehouse().getCode(), s.getWarehouse().getName(),
-                    s.getQuantity(), s.getProduct().getReorderLevel());
+                    s.getQuantity(), s.getProduct().getReorderLevel(),
+                    s.getBin(), s.getMinQuantity(), s.getMaxQuantity());
         }
     }
+
+    /** Bin location + per-warehouse reorder rule for one stock level row. */
+    public record StockLevelSettingsRequest(@Size(max = 64) String bin,
+                                            @PositiveOrZero Integer minQuantity,
+                                            @PositiveOrZero Integer maxQuantity) {}
+
+    public record StocktakeCount(@NotNull Long productId, @NotNull @PositiveOrZero Integer counted) {}
+
+    public record StocktakeRequest(@NotNull Long warehouseId,
+                                   @NotNull @Size(min = 1) List<StocktakeCount> counts) {}
+
+    public record StocktakeVariance(Long productId, String sku, String name,
+                                    int expected, int counted, int delta) {}
+
+    public record StocktakeResult(String reference, int itemsCounted, int itemsAdjusted,
+                                  List<StocktakeVariance> variances) {}
+
+    public record ReorderSuggestion(Long productId, String sku, String productName,
+                                    Long supplierId, String supplierName,
+                                    Long warehouseId, String warehouseCode,
+                                    int currentQuantity, int minQuantity, int suggestedQuantity) {}
 
     public record StockMovementDto(Long id, Long productId, String productSku, String productName,
                                    Long warehouseId, String warehouseCode,

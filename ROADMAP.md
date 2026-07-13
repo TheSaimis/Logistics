@@ -21,13 +21,15 @@ treated as binding before any deployment beyond localhost.
   - Demo credentials removed from the login page
 - Tests: 14 unit tests (StockService movement math + PasswordPolicy) — `mvnw test`
 
-## Phase 1 — Operating basics (next up)
+## Phase 1 — Operating basics
 
-1. **Password reset flow** — token-based email reset (needs SMTP config), or minimally an
-   admin-triggered "force reset on next login". Currently recovery = admin sets a new password.
-2. **Git history** — repo is not yet under version control. `git init`, commit, remote.
-3. **Reorder suggestions** (council's top feature pick): burn rate from stock_movements +
-   current level + reorder_level → "draft PO" list per supplier. Turns record-keeping into decisions.
+1. **Password reset flow** (still open) — token-based email reset (needs SMTP config), or minimally
+   an admin-triggered "force reset on next login". Currently recovery = admin sets a new password.
+2. ~~Git history~~ ✅ Done — github.com/TheSaimis/Logistics, branches: main / frontend / backend.
+3. ~~Reorder suggestions~~ ✅ Done — per-warehouse min/max rules (Odoo-inspired) + global fallback,
+   Reorder page grouped by supplier. Excel import/export also done (Apache POI).
+   Also done: barcode/QR labels + scan box (InvenTree/Snipe-IT-inspired), stock-take sessions
+   (Odoo-inspired), storage bins. Sources credited in README "Acknowledgements".
 4. Category/Supplier delete audit entries + movement CSV export (small, high admin value).
 
 ## Phase 2 — Production gate (BINDING before exposure beyond localhost)

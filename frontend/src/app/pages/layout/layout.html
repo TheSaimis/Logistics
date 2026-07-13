@@ -9,6 +9,10 @@
       <a routerLink="/dashboard" routerLinkActive="active">🏠 Dashboard</a>
       <a routerLink="/products" routerLinkActive="active">📋 Inventory</a>
       <a routerLink="/movements" routerLinkActive="active">🔄 Movements</a>
+      @if (auth.canEdit()) {
+        <a routerLink="/stocktake" routerLinkActive="active">🧮 Stock take</a>
+      }
+      <a routerLink="/reorder" routerLinkActive="active">🛒 Reorder</a>
       <a routerLink="/warehouses" routerLinkActive="active">🏭 Warehouses</a>
       <a routerLink="/partners" routerLinkActive="active">🤝 Partners</a>
       @if (auth.isAdmin()) {

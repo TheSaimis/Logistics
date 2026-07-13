@@ -79,12 +79,18 @@
 
 @if (detail(); as d) {
   <div class="modal-backdrop" (click)="detail.set(null)">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal-wide" (click)="$event.stopPropagation()">
       <h2>{{ d.code }} — {{ d.name }}</h2>
+      <p class="muted">Bin = storage location in this warehouse. Min/Max = per-warehouse reorder rule
+        (suggestions appear on the Reorder page when stock drops below Min).</p>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>SKU</th><th>Product</th><th class="text-right">Quantity</th></tr>
+            <tr>
+              <th>SKU</th><th>Product</th><th class="text-right">Qty</th>
+              <th>Bin</th><th>Min</th><th>Max</th>
+              @if (auth.canEdit()) { <th></th> }
+            </tr>
           </thead>
           <tbody>
             @for (level of detailStock(); track level.id) {
@@ -92,9 +98,23 @@
                 <td>{{ level.productSku }}</td>
                 <td>{{ level.productName }}</td>
                 <td class="text-right">{{ level.quantity }}</td>
+                @if (auth.canEdit()) {
+                  <td><input class="cell-input" [(ngModel)]="level.bin" name="bin-{{ level.id }}" placeholder="A-01-1" /></td>
+                  <td><input class="cell-input num" type="number" min="0" [(ngModel)]="level.minQuantity" name="min-{{ level.id }}" /></td>
+                  <td><input class="cell-input num" type="number" min="0" [(ngModel)]="level.maxQuantity" name="max-{{ level.id }}" /></td>
+                  <td>
+                    <button class="btn btn-ghost btn-sm" (click)="saveLevelSettings(level)">
+                      {{ savedLevelId() === level.id ? '✓ Saved' : 'Save' }}
+                    </button>
+                  </td>
+                } @else {
+                  <td class="muted">{{ level.bin || '—' }}</td>
+                  <td class="muted">{{ level.minQuantity ?? '—' }}</td>
+                  <td class="muted">{{ level.maxQuantity ?? '—' }}</td>
+                }
               </tr>
             } @empty {
-              <tr><td colspan="3" class="empty-state">This warehouse is empty.</td></tr>
+              <tr><td colspan="7" class="empty-state">This warehouse is empty.</td></tr>
             }
           </tbody>
         </table>

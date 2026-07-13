@@ -71,6 +71,23 @@ $env:GOOGLE_CLIENT_SECRET='...'
 The "Continue with Google" button on the login page then works end-to-end; first-time
 Google users are provisioned automatically with the VIEWER role.
 
+## Acknowledgements & inspiration
+
+Several features in this project follow patterns established by excellent open-source
+inventory/asset systems — credit where it's due:
+
+- **[InvenTree](https://github.com/inventree/InvenTree)** (MIT) — per-SKU barcode labels and
+  scan-to-find workflow, storage bin locations inside warehouses, retaining stock history even
+  when items are removed (our soft-delete + movement ledger), and the principle of separating
+  product data import from stock mutations.
+- **[Odoo](https://github.com/odoo/odoo)** (LGPL) — guided stock-take ("inventory adjustment")
+  sessions that produce auditable adjustment movements plus a variance report, and per-warehouse
+  min/max reordering rules that drive suggested purchases grouped by supplier.
+- **[Snipe-IT](https://github.com/snipe/snipe-it)** (AGPL) — printable asset labels with
+  barcode + QR, and the audit-log-first approach to admin accountability.
+
+No code was copied from these projects; they served as design references only.
+
 ## Production notes
 
 - Set `JWT_SECRET` (base64, ≥64 random bytes), real DB credentials, and `CORS_ORIGINS`

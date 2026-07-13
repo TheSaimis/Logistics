@@ -1,0 +1,45 @@
+<div class="page-header">
+  <h1>Reorder suggestions</h1>
+</div>
+
+<p class="muted intro">
+  Products below their per-warehouse Min rule (set in Warehouses → View stock) or, when no rule
+  exists, below their global reorder level. Suggested quantity tops stock up to Max (or 2× Min).
+</p>
+
+@if (error()) {
+  <div class="form-error">{{ error() }}</div>
+}
+
+@if (loaded() && suggestions().length === 0) {
+  <p class="empty-state">🎉 Nothing to reorder — all stock is above its thresholds.</p>
+}
+
+@for (group of groups(); track group.supplierName) {
+  <div class="card supplier-card">
+    <h2>🏢 {{ group.supplierName }}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th><th>Product</th><th>Warehouse</th>
+            <th class="text-right">Current</th><th class="text-right">Min</th>
+            <th class="text-right">Suggested order</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of group.suggestions; track s.sku + (s.warehouseCode ?? '')) {
+            <tr>
+              <td>{{ s.sku }}</td>
+              <td>{{ s.productName }}</td>
+              <td class="muted">{{ s.warehouseCode ?? 'All (global rule)' }}</td>
+              <td class="text-right"><span class="badge badge-red">{{ s.currentQuantity }}</span></td>
+              <td class="text-right muted">{{ s.minQuantity }}</td>
+              <td class="text-right"><strong>{{ s.suggestedQuantity }}</strong></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
