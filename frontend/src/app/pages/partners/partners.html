@@ -26,8 +26,8 @@
               <td class="muted">{{ c.description || '—' }}</td>
               <td class="text-right">
                 @if (auth.canEdit()) {
-                  <button class="btn btn-ghost btn-sm" (click)="openCategory(c)">Edit</button>
-                  <button class="btn btn-ghost btn-sm" (click)="deleteCategory(c)">Delete</button>
+                  <button class="btn btn-edit btn-sm" (click)="openCategory(c)">Edit</button>
+                  <button class="btn btn-delete btn-sm" (click)="deleteCategory(c)">Delete</button>
                 }
               </td>
             </tr>
@@ -59,8 +59,8 @@
               <td class="muted">{{ s.phone || '—' }}</td>
               <td class="text-right">
                 @if (auth.canEdit()) {
-                  <button class="btn btn-ghost btn-sm" (click)="openSupplier(s)">Edit</button>
-                  <button class="btn btn-ghost btn-sm" (click)="deleteSupplier(s)">Delete</button>
+                  <button class="btn btn-edit btn-sm" (click)="openSupplier(s)">Edit</button>
+                  <button class="btn btn-delete btn-sm" (click)="deleteSupplier(s)">Delete</button>
                 }
               </td>
             </tr>

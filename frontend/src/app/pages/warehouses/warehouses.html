@@ -16,8 +16,8 @@
         <span class="badge badge-blue">{{ w.code }}</span>
         @if (auth.canEdit()) {
           <span>
-            <button class="btn btn-ghost btn-sm" (click)="openEdit(w)">Edit</button>
-            <button class="btn btn-ghost btn-sm" (click)="remove(w)">Delete</button>
+            <button class="btn btn-edit btn-sm" (click)="openEdit(w)">Edit</button>
+            <button class="btn btn-delete btn-sm" (click)="remove(w)">Delete</button>
           </span>
         }
       </div>

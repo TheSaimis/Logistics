@@ -28,7 +28,6 @@
 }
 
 <div class="card scan-bar">
-  <span class="scan-icon">📷</span>
   <input placeholder="Scan or type a SKU, then press Enter…" [(ngModel)]="scanValue"
          (keyup.enter)="onScan()" name="scan" />
   @if (scanError()) {
@@ -145,9 +144,9 @@
             }
             <td class="text-right">
               @if (auth.canEdit()) {
-                <button class="btn btn-ghost btn-sm" (click)="openEdit(p)">Edit</button>
+                <button class="btn btn-edit btn-sm" (click)="openEdit(p)">Edit</button>
                 @if (p.active) {
-                  <button class="btn btn-ghost btn-sm" (click)="deactivate(p)">Deactivate</button>
+                  <button class="btn btn-delete btn-sm" (click)="deactivate(p)">Deactivate</button>
                 }
               }
             </td>

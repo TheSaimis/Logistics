@@ -77,8 +77,12 @@ a {
   border: 1px solid transparent;
   border-radius: 8px;
   padding: 0.5rem 1rem;
+  /* font-family must be explicit: <button> does not inherit the body font,
+     so button-styled <label>/<a> elements would otherwise render differently */
+  font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
+  line-height: 1.4;
   cursor: pointer;
   background: var(--primary);
   color: #fff;
@@ -103,6 +107,19 @@ a {
     background: transparent;
     color: var(--text-muted);
     &:hover { background: var(--bg); color: var(--text); }
+  }
+
+  /* Row actions: edit and delete must be visually distinct */
+  &.btn-edit {
+    background: transparent;
+    color: var(--primary);
+    &:hover { background: var(--primary-soft); color: var(--primary-dark); }
+  }
+
+  &.btn-delete {
+    background: transparent;
+    color: var(--danger);
+    &:hover { background: var(--danger-soft); color: #b91c1c; }
   }
 
   &.btn-sm {

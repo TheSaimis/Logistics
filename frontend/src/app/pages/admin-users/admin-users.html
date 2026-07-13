@@ -37,9 +37,9 @@
             </td>
             <td class="muted">{{ u.createdAt | date: 'MMM d, y' }}</td>
             <td class="text-right">
-              <button class="btn btn-ghost btn-sm" (click)="openEdit(u)">Edit</button>
+              <button class="btn btn-edit btn-sm" (click)="openEdit(u)">Edit</button>
               @if (u.email !== auth.user()?.email) {
-                <button class="btn btn-ghost btn-sm" (click)="remove(u)">Delete</button>
+                <button class="btn btn-delete btn-sm" (click)="remove(u)">Delete</button>
               }
             </td>
           </tr>
